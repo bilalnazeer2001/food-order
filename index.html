@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre-Order — Quick Pickup</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#fdf6ed;
+  --cream2:#f5ead8;
+  --brown:#2c1a0e;
+  --brown2:#4a2f1a;
+  --rust:#c0450a;
+  --rust2:#e05510;
+  --amber:#f59e0b;
+  --green:#1a6641;
+  --green2:#22a05a;
+  --text:#1e1208;
+  --muted:#8a6d52;
+  --border:#dcc9b0;
+  --card:#fff9f2;
+  --display:'Playfair Display',serif;
+  --body:'Outfit',sans-serif;
+}
+html{font-size:16px}
+body{
+  background:var(--cream);
+  color:var(--text);
+  font-family:var(--body);
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(240,160,60,0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 90% 100%, rgba(192,69,10,0.1) 0%, transparent 60%);
+  pointer-events:none;z-index:0;
+}
+
+.page{
+  position:relative;z-index:1;
+  max-width:540px;
+  margin:0 auto;
+  padding:40px 20px 80px;
+}
+
+.brand{
+  text-align:center;
+  margin-bottom:40px;
+}
+.brand-name{
+  font-family:var(--display);
+  font-size:clamp(28px,6vw,40px);
+  font-weight:800;
+  color:var(--brown);
+  line-height:1.1;
+  letter-spacing:-0.01em;
+}
+.brand-tag{
+  font-size:12px;
+  color:var(--muted);
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  margin-top:6px;
+  font-weight:400;
+}
+.brand-divider{
+  width:40px;height:2px;
+  background:var(--rust);
+  margin:12px auto 0;
+  border-radius:2px;
+}
+
+.steps{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  margin-bottom:32px;
+}
+.step-dot{
+  width:28px;height:28px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;
+  border:2px solid var(--border);
+  color:var(--muted);
+  background:var(--card);
+  transition:all 0.3s;
+  flex-shrink:0;
+  font-family:var(--body);
+}
+.step-dot.active{
+  background:var(--rust);
+  border-color:var(--rust);
+  color:#fff;
+}
+.step-dot.done{
+  background:var(--green);
+  border-color:var(--green);
+  color:#fff;
+}
+.step-line{
+  flex:1;height:2px;
+  background:var(--border);
+  max-width:60px;
+  transition:background 0.3s;
+}
+.step-line.done{background:var(--green)}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:28px 24px;
+  margin-bottom:16px;
+  box-shadow:0 2px 16px rgba(44,26,14,0.06);
+  display:none;
+}
+.card.active{
+  display:block;
+  animation:slideup 0.3s ease;
+}
+@keyframes slideup{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:none}
+}
+
+.card-title{
+  font-family:var(--display);
+  font-size:22px;
+  font-weight:700;
+  color:var(--brown);
+  margin-bottom:4px;
+}
+.card-sub{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:24px;
+  line-height:1.6;
+}
+
+.field{margin-bottom:18px}
+label{
+  display:block;
+  font-size:12px;
+  font-weight:600;
+  color:var(--brown2);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:7px;
+}
+input[type=text],input[type=tel],input[type=time],textarea,select{
+  width:100%;
+  padding:12px 16px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:#fff;
+  color:var(--text);
+  font-family:var(--body);
+  font-size:15px;
+  outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--rust);
+  box-shadow:0 0 0 3px rgba(192,69,10,0.1);
+}
+input::placeholder,textarea::placeholder{color:#c4aa92}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+
+.menu-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:6px;
+}
+.menu-item{
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px;
+  cursor:pointer;
+  transition:all 0.18s;
+  background:#fff;
+  position:relative;
+  user-select:none;
+}
+.menu-item:hover{border-color:var(--rust);background:rgba(192,69,10,0.03)}
+.menu-item.selected{
+  border-color:var(--rust);
+  background:rgba(192,69,10,0.06);
+}
+.menu-item.selected::after{
+  content:'✓';
+  position:absolute;top:8px;right:10px;
+  font-size:11px;color:var(--rust);font-weight:700;
+}
+.item-name{font-size:13px;font-weight:500;color:var(--brown);line-height:1.3}
+.item-price{font-size:12px;color:var(--muted);margin-top:3px}
+
+.qty-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  background:#fff;
+  margin-bottom:8px;
+}
+.qty-name{font-size:14px;font-weight:500}
+.qty-price{font-size:12px;color:var(--muted)}
+.qty-ctrl{display:flex;align-items:center;gap:12px}
+.qty-btn{
+  width:28px;height:28px;
+  border-radius:50%;
+  border:1.5px solid var(--border);
+  background:transparent;
+  color:var(--brown);
+  font-size:16px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s;
+  line-height:1;
+}
+.qty-btn:hover{border-color:var(--rust);color:var(--rust)}
+.qty-num{font-size:15px;font-weight:600;min-width:18px;text-align:center}
+
+.pay-options{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.pay-opt{
+  border:2px solid var(--border);
+  border-radius:12px;
+  padding:16px 14px;
+  cursor:pointer;
+  text-align:center;
+  transition:all 0.18s;
+  background:#fff;
+}
+.pay-opt:hover{border-color:var(--amber)}
+.pay-opt.selected{border-color:var(--rust);background:rgba(192,69,10,0.05)}
+.pay-opt .pay-icon{font-size:24px;margin-bottom:6px}
+.pay-opt .pay-label{font-size:13px;font-weight:600;color:var(--brown)}
+.pay-opt .pay-desc{font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4}
+
+.note-hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px dashed var(--border);
+  font-size:14px;
+}
+.summary-row:last-child{border-bottom:none}
+.summary-row.total{
+  font-weight:600;
+  font-size:16px;
+  color:var(--brown);
+  padding-top:14px;
+}
+.summary-row .s-qty{color:var(--muted);font-size:12px;margin-left:6px}
+
+.pay-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 12px;border-radius:999px;
+  font-size:11px;font-weight:600;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+.pay-badge.prepaid{background:rgba(26,102,65,0.1);color:var(--green)}
+.pay-badge.pickup{background:rgba(245,158,11,0.12);color:#b45309}
+
+.btn-primary{
+  width:100%;
+  padding:15px;
+  background:var(--rust);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-family:var(--body);
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  letter-spacing:0.02em;
+  transition:all 0.18s;
+  margin-top:8px;
+}
+.btn-primary:hover{background:var(--rust2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(192,69,10,0.25)}
+.btn-primary:active{transform:none}
+
+.btn-ghost{
+  width:100%;
+  padding:12px;
+  background:transparent;
+  color:var(--muted);
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  font-family:var(--body);
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  margin-top:8px;
+  transition:all 0.15s;
+}
+.btn-ghost:hover{border-color:var(--muted);color:var(--brown)}
+
+.confirm-screen{
+  text-align:center;
+  padding:16px 0;
+  display:none;
+}
+.confirm-screen.active{
+  display:block;
+  animation:slideup 0.4s ease;
+}
+.confirm-icon{
+  width:72px;height:72px;
+  border-radius:50%;
+  background:rgba(26,102,65,0.1);
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+  font-size:32px;
+  animation:popin 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popin{
+  from{transform:scale(0.5);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+.confirm-title{
+  font-family:var(--display);
+  font-size:26px;
+  font-weight:800;
+  color:var(--brown);
+  margin-bottom:6px;
+}
+.confirm-sub{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
+
+.confirm-bucket{
+  background:var(--brown);
+  color:var(--cream);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
+}
+.bucket-label{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(253,246,237,0.6);margin-bottom:6px}
+.bucket-big{
+  font-family:var(--display);
+  font-size:56px;
+  font-weight:800;
+  color:#fff;
+  line-height:1;
+  margin-bottom:8px;
+}
+.bucket-id{font-size:12px;color:rgba(253,246,237,0.5);font-family:monospace;letter-spacing:0.1em}
+
+.telegram-note{
+  background:rgba(0,136,204,0.08);
+  border:1px solid rgba(0,136,204,0.2);
+  border-radius:12px;
+  padding:14px 18px;
+  font-size:13px;
+  color:#0066cc;
+  line-height:1.6;
+  text-align:left;
+}
+.telegram-note strong{color:#003d99}
+
+input.error,select.error{border-color:var(--rust)!important}
+.err-msg{font-size:11px;color:var(--rust);margin-top:4px;display:none}
+.err-msg.show{display:block}
+
+.slot-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+}
+.slot{
+  padding:10px 8px;
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  text-align:center;
+  font-size:13px;font-weight:500;
+  cursor:pointer;
+  background:#fff;
+  transition:all 0.15s;
+  color:var(--brown2);
+}
+.slot:hover{border-color:var(--rust)}
+.slot.selected{border-color:var(--rust);background:rgba(192,69,10,0.07);color:var(--rust)}
+.slot.full{opacity:0.4;cursor:not-allowed;text-decoration:line-through}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="brand">
+    <div class="brand-name">Pre-Order</div>
+    <div class="brand-tag">Skip the rush · Pick up fast</div>
+    <div class="brand-divider"></div>
+  </div>
+
+  <div class="steps" id="stepsBar">
+    <div class="step-dot active" id="sd1">1</div>
+    <div class="step-line" id="sl1"></div>
+    <div class="step-dot" id="sd2">2</div>
+    <div class="step-line" id="sl2"></div>
+    <div class="step-dot" id="sd3">3</div>
+    <div class="step-line" id="sl3"></div>
+    <div class="step-dot" id="sd4">4</div>
+  </div>
+
+  <!-- STEP 1: Your details -->
+  <div class="card active" id="step1">
+    <div class="card-title">Your details</div>
+    <div class="card-sub">We'll send your bucket number to your Telegram.</div>
+
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="custName" placeholder="e.g. Ayesha Rahman">
+      <div class="err-msg" id="err-name">Please enter your name</div>
+    </div>
+    <div class="field">
+      <label>Telegram username</label>
+      <input type="text" id="custTelegram" placeholder="@yourname or your username">
+      <div class="err-msg" id="err-telegram">Please enter your Telegram username</div>
+      <div class="note-hint">Your Telegram @username (e.g. @ayesha123)</div>
+    </div>
+    <div class="field">
+      <label>Pickup time slot</label>
+      <div class="slot-grid" id="slotGrid"></div>
+      <div class="err-msg" id="err-slot">Please select a pickup slot</div>
+    </div>
+
+    <button class="btn-primary" onclick="goStep(2)">Continue →</button>
+  </div>
+
+  <!-- STEP 2: Menu -->
+  <div class="card" id="step2">
+    <div class="card-title">Choose your food</div>
+    <div class="card-sub">Select items — then set quantities on the next screen.</div>
+
+    <div class="menu-grid" id="menuGrid"></div>
+    <div class="err-msg" id="err-items">Please select at least one item</div>
+
+    <button class="btn-primary" onclick="goStep(3)" style="margin-top:16px">Next →</button>
+    <button class="btn-ghost" onclick="goStep(1)">← Back</button>
+  </div>
+
+  <!-- STEP 3: Quantities + note + payment -->
+  <div class="card" id="step3">
+    <div class="card-title">Quantities & payment</div>
+    <div class="card-sub">Adjust quantities and choose how you'd like to pay.</div>
+
+    <div id="qtyList" style="margin-bottom:20px"></div>
+
+    <div class="field">
+      <label>Special instructions</label>
+      <textarea id="specialNote" placeholder="e.g. No onion in biryani, extra spicy…"></textarea>
+      <div class="note-hint">Optional — our kitchen will do their best!</div>
+    </div>
+
+    <div class="field">
+      <label>Payment</label>
+      <div class="pay-options">
+        <div class="pay-opt" id="pay-online" onclick="selectPay('paid')">
+          <div class="pay-icon">💳</div>
+          <div class="pay-label">Pay now</div>
+          <div class="pay-desc">UPI / card · Priority pickup</div>
+        </div>
+        <div class="pay-opt" id="pay-counter" onclick="selectPay('unpaid')">
+          <div class="pay-icon">💵</div>
+          <div class="pay-label">Pay at pickup</div>
+          <div class="pay-desc">Cash or UPI at counter</div>
+        </div>
+      </div>
+      <div class="err-msg" id="err-pay">Please select a payment option</div>
+    </div>
+
+    <button class="btn-primary" onclick="goStep(4)">Review order →</button>
+    <button class="btn-ghost" onclick="goStep(2)">← Back</button>
+  </div>
+
+  <!-- STEP 4: Review -->
+  <div class="card" id="step4">
+    <div class="card-title">Review & confirm</div>
+    <div class="card-sub">Double-check your order before we lock it in.</div>
+
+    <div id="summaryBlock" style="margin-bottom:20px"></div>
+
+    <button class="btn-primary" onclick="submitOrder()">✓ Confirm Order</button>
+    <button class="btn-ghost" onclick="goStep(3)">← Edit</button>
+  </div>
+
+  <!-- CONFIRM screen -->
+  <div class="confirm-screen" id="confirmScreen">
+    <div class="confirm-icon">🎉</div>
+    <div class="confirm-title">Order confirmed!</div>
+    <div class="confirm-sub" id="confirmSub">Your bucket number is being sent to your Telegram.</div>
+
+    <div class="confirm-bucket">
+      <div class="bucket-label">Your bucket number</div>
+      <div class="bucket-big" id="confirmBucket">B4</div>
+      <div class="bucket-id" id="confirmId">ORD-1234567890</div>
+    </div>
+
+    <div class="telegram-note" id="telegramNote">
+      📲 <strong>Check your Telegram</strong> — your bucket number and QR code have been sent to @<span id="confirmTelegram"></span>. Show the QR to staff at the <strong>Pre-Order counter</strong> when you arrive.
+    </div>
+
+    <button class="btn-ghost" onclick="resetForm()" style="margin-top:20px">Place another order</button>
+  </div>
+
+</div>
+
+<script>
+const MENU = [
+  {id:'biryani-c', name:'Chicken Biryani', price:220, emoji:'🍗'},
+  {id:'biryani-v', name:'Veg Biryani', price:180, emoji:'🌿'},
+  {id:'paneer',    name:'Paneer Masala', price:160, emoji:'🧀'},
+  {id:'mutton',    name:'Mutton Curry', price:260, emoji:'🍖'},
+  {id:'fish',      name:'Fish Curry', price:200, emoji:'🐟'},
+  {id:'dal',       name:'Dal Makhani', price:130, emoji:'🫘'},
+  {id:'naan',      name:'Butter Naan', price:40,  emoji:'🫓'},
+  {id:'rice',      name:'Steamed Rice', price:60,  emoji:'🍚'},
+  {id:'lassi',     name:'Mango Lassi', price:80,  emoji:'🥛'},
+  {id:'raita',     name:'Raita', price:50,  emoji:'🥄'},
+];
+
+const SLOTS = [
+  {t:'12:00 PM', full:false},
+  {t:'12:30 PM', full:false},
+  {t:'01:00 PM', full:false},
+  {t:'01:30 PM', full:true},
+  {t:'02:00 PM', full:false},
+  {t:'02:30 PM', full:false},
+];
+
+let state = {
+  name:'', telegram_id:'', slot:'',
+  selected:[], qty:{}, note:'',
+  payment:'', currentStep:1,
+  bucketNo:'', orderId:''
+};
+
+function buildSlots(){
+  const g = document.getElementById('slotGrid');
+  SLOTS.forEach(s => {
+    const d = document.createElement('div');
+    d.className = 'slot' + (s.full?' full':'');
+    d.textContent = s.t;
+    d.dataset.time = s.t;
+    if(!s.full) d.onclick = () => selectSlot(d, s.t);
+    g.appendChild(d);
+  });
+}
+
+function selectSlot(el, t){
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  state.slot = t;
+}
+
+function buildMenu(){
+  const g = document.getElementById('menuGrid');
+  MENU.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'menu-item';
+    d.id = 'mi-'+item.id;
+    d.innerHTML = `<div class="item-name">${item.emoji} ${item.name}</div><div class="item-price">₹${item.price}</div>`;
+    d.onclick = () => toggleItem(item, d);
+    g.appendChild(d);
+  });
+}
+
+function toggleItem(item, el){
+  if(el.classList.contains('selected')){
+    el.classList.remove('selected');
+    state.selected = state.selected.filter(i => i.id !== item.id);
+    delete state.qty[item.id];
+  } else {
+    el.classList.add('selected');
+    state.selected.push(item);
+    state.qty[item.id] = 1;
+  }
+}
+
+function buildQtyList(){
+  const c = document.getElementById('qtyList');
+  c.innerHTML = '';
+  if(state.selected.length === 0){
+    c.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">No items selected</div>';
+    return;
+  }
+  state.selected.forEach(item => {
+    if(!state.qty[item.id]) state.qty[item.id] = 1;
+    const row = document.createElement('div');
+    row.className = 'qty-row';
+    row.id = 'qr-'+item.id;
+    row.innerHTML = `
+      <div>
+        <div class="qty-name">${item.emoji} ${item.name}</div>
+        <div class="qty-price">₹${item.price} each</div>
+      </div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+        <div class="qty-num" id="qn-${item.id}">${state.qty[item.id]}</div>
+        <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+      </div>`;
+    c.appendChild(row);
+  });
+}
+
+function changeQty(id, delta){
+  state.qty[id] = Math.max(1, (state.qty[id]||1) + delta);
+  document.getElementById('qn-'+id).textContent = state.qty[id];
+}
+
+function selectPay(type){
+  state.payment = type;
+  document.getElementById('pay-online').classList.toggle('selected', type==='paid');
+  document.getElementById('pay-counter').classList.toggle('selected', type==='unpaid');
+  document.getElementById('err-pay').classList.remove('show');
+}
+
+function buildSummary(){
+  const c = document.getElementById('summaryBlock');
+  let total = 0;
+  let rows = '';
+  state.selected.forEach(item => {
+    const q = state.qty[item.id]||1;
+    const sub = item.price * q;
+    total += sub;
+    rows += `<div class="summary-row">
+      <span>${item.emoji} ${item.name}<span class="s-qty">×${q}</span></span>
+      <span>₹${sub}</span>
+    </div>`;
+  });
+
+  const payLabel = state.payment === 'paid'
+    ? '<span class="pay-badge prepaid">✓ Pay Now</span>'
+    : '<span class="pay-badge pickup">Pay at Pickup</span>';
+
+  c.innerHTML = `
+    <div style="background:var(--cream2);border-radius:12px;padding:16px 18px;margin-bottom:14px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.1em">Pickup for</div>
+      <div style="font-weight:600;font-size:15px">${state.name}</div>
+      <div style="font-size:13px;color:var(--muted)">${state.telegram_id} · ${state.slot}</div>
+    </div>
+    ${rows}
+    <div class="summary-row total">
+      <span>Total</span><span>₹${total}</span>
+    </div>
+    <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--muted)">Payment</span>
+      ${payLabel}
+    </div>
+    ${state.note ? `<div style="margin-top:12px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid var(--border);font-size:12px;color:var(--muted)">📝 ${state.note}</div>` : ''}
+  `;
+}
+
+function goStep(n){
+  if(n > 1 && state.currentStep === 1){
+    let ok = true;
+    state.name = document.getElementById('custName').value.trim();
+    state.telegram_id = document.getElementById('custTelegram').value.trim();
+    if(!state.name){ document.getElementById('err-name').classList.add('show'); ok=false; } else document.getElementById('err-name').classList.remove('show');
+    if(!state.telegram_id){ document.getElementById('err-telegram').classList.add('show'); ok=false; } else document.getElementById('err-telegram').classList.remove('show');
+    if(!state.slot){ document.getElementById('err-slot').classList.add('show'); ok=false; } else document.getElementById('err-slot').classList.remove('show');
+    if(!ok) return;
+  }
+  if(n > 2 && state.currentStep === 2){
+    if(state.selected.length === 0){ document.getElementById('err-items').classList.add('show'); return; }
+    document.getElementById('err-items').classList.remove('show');
+  }
+  if(n > 3 && state.currentStep === 3){
+    if(!state.payment){ document.getElementById('err-pay').classList.add('show'); return; }
+    state.note = document.getElementById('specialNote').value.trim();
+    buildSummary();
+  }
+
+  document.getElementById('step'+state.currentStep).classList.remove('active');
+  state.currentStep = n;
+
+  if(n === 3) buildQtyList();
+  document.getElementById('step'+n).classList.add('active');
+  updateSteps(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateSteps(n){
+  for(let i=1;i<=4;i++){
+    const dot = document.getElementById('sd'+i);
+    const line = document.getElementById('sl'+i);
+    dot.className = 'step-dot' + (i<n?' done':i===n?' active':'');
+    if(line) line.className = 'step-line' + (i<n?' done':'');
+  }
+}
+
+function submitOrder(){
+  const taken = ['B1','B2'];
+  let b = 1;
+  while(taken.includes('B'+b)) b++;
+  state.bucketNo = 'B'+b;
+  state.orderId = 'ORD-' + Date.now().toString().slice(-8);
+
+  for(let i=1;i<=4;i++) document.getElementById('step'+i).classList.remove('active');
+  document.getElementById('stepsBar').style.display = 'none';
+
+  document.getElementById('confirmBucket').textContent = state.bucketNo;
+  document.getElementById('confirmId').textContent = state.orderId;
+  document.getElementById('confirmTelegram').textContent = state.telegram_id.replace('@', '');
+
+  document.getElementById('confirmScreen').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Send to Apps Script
+  const itemsText = state.selected.map(i => `${i.name} x${state.qty[i.id]}`).join(', ');
+  const total = state.selected.reduce((sum,i) => sum + i.price * state.qty[i.id], 0);
+
+  fetch('https://script.google.com/macros/s/AKfycbyivQA_a3ypfFRXZTkCg5kN0H7wulVoiEj6iabIaucS7qzC8rQT8RCxzNJ1SLJQvLWXZA/exec', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: state.name,
+      telegram_id: state.telegram_id,
+      items: itemsText,
+      payment_method: state.payment,
+      slot: state.slot,
+      total: '₹' + total
+    })
+  }).then(res => res.json()).then(data => {
+    console.log('Order submitted:', data);
+  }).catch(err => console.error('Error:', err));
+}
+
+function resetForm(){
+  state = {name:'',telegram_id:'',slot:'',selected:[],qty:{},note:'',payment:'',currentStep:1,bucketNo:'',orderId:''};
+  document.getElementById('confirmScreen').classList.remove('active');
+  document.getElementById('stepsBar').style.display = 'flex';
+  document.getElementById('custName').value = '';
+  document.getElementById('custTelegram').value = '';
+  document.getElementById('specialNote').value = '';
+  document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('selected'));
+  document.getElementById('pay-online').classList.remove('selected');
+  document.getElementById('pay-counter').classList.remove('selected');
+  goStep(1);
+}
+
+buildSlots();
+buildMenu();
+</script>
+</body>
+</html>
