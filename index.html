@@ -727,7 +727,7 @@ function submitOrder(){
   const itemsText = state.selected.map(i => `${i.name} x${state.qty[i.id]}`).join(', ');
   const total = state.selected.reduce((sum,i) => sum + i.price * state.qty[i.id], 0);
 
-  fetch('https://script.google.com/macros/s/AKfycbyivQA_a3ypfFRXZTkCg5kN0H7wulVoiEj6iabIaucS7qzC8rQT8RCxzNJ1SLJQvLWXZA/exec', {
+  fetch('https://script.google.com/macros/s/AKfycbzmuRlCALHzVWIv4hpfNDPevVLxZQZuioemvqcAKhibbICa1Trxt4lvkFuH4TVwDGD1sA/exec', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
